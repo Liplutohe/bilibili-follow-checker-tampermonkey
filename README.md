@@ -18,8 +18,8 @@
 
 [### ✅ 方法一（推荐）
 1. 安装浏览器扩展 [Tampermonkey](https://www.tampermonkey.net/)  
-2. 右键复制以下链接地址：(https://raw.githubusercontent.com/Liplutothe/bilibili-follow-checker-tampermonkey/main/bilibili-follow-checker.user.js)
-3. 在浏览器中打开 Tampermonkey → 点击“+” → 粘贴链接 → 自动识别并安装脚本 ](https://raw.githubusercontent.com/Liplutothe/bilibili-follow-checker-tampermonkey/main/bilibili-follow-checker.user.js) 
+2. 找到code界面main里面的bilibili-follow-checker.user.js，点开后点击raw下载
+3. 跳转到油猴界面点击install下载脚本 
 
 ### 💡 方法二（未来可选）
 待发布到 [GreasyFork](https://greasyfork.org/zh-CN) 后，用户可直接点击“一键安装”完成安装与更新。  
