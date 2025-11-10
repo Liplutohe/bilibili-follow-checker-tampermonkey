@@ -1,13 +1,13 @@
 // ==UserScript==
-// @name         Bilibili 关注时间查询
+// @name         Bilibili 关注时间查询（查看是否已关注 + 时间）
 // @namespace    https://github.com/Liplutothe/bilibili-follow-checker-tampermonkey
-// @version      1.3
-// @description  查询你对某个UP主的关注状态和关注时间（模糊匹配 + 登录自动识别）
+// @version      1.3.1
+// @description  在B站上查询你对某个up主的关注状态和关注时间（支持模糊匹配 + 登录检测）
 // @author       Liplutothe
 // @match        *://*.bilibili.com/*
 // @grant        GM_addStyle
 // @license      MIT
-// @homepage     https://github.com/Liplutothe/bilibili-follow-checker-tampermonkey
+// @homepageURL  https://github.com/Liplutothe/bilibili-follow-checker-tampermonkey
 // @updateURL    https://raw.githubusercontent.com/Liplutothe/bilibili-follow-checker-tampermonkey/main/bilibili-follow-checker.user.js
 // @downloadURL  https://raw.githubusercontent.com/Liplutothe/bilibili-follow-checker-tampermonkey/main/bilibili-follow-checker.user.js
 // ==/UserScript==
@@ -15,6 +15,7 @@
 (function () {
     'use strict';
 
+    // ===== 样式部分 =====
     GM_addStyle(`
         #followCheckBtn {
             position: fixed;
@@ -66,6 +67,7 @@
         }
     `);
 
+    // ===== 创建按钮和面板 =====
     const btn = document.createElement('button');
     btn.id = 'followCheckBtn';
     btn.textContent = '🔍';
@@ -80,10 +82,12 @@
     `;
     document.body.appendChild(panel);
 
+    // 点击按钮显示/隐藏面板
     btn.addEventListener('click', () => {
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     });
 
+    // ===== 查询逻辑 =====
     document.getElementById('checkBtn').addEventListener('click', async () => {
         const query = document.getElementById('upName').value.trim();
         const result = document.getElementById('followCheckResult');
@@ -95,21 +99,26 @@
         result.textContent = '正在获取登录信息...';
 
         try {
-            const selfRes = await fetch('https://api.bilibili.com/x/web-interface/nav');
+            // 获取登录用户 UID（确保带上 Cookie）
+            const selfRes = await fetch('https://api.bilibili.com/x/web-interface/nav', {
+                credentials: 'include'
+            });
             const selfData = await selfRes.json();
             if (selfData.code !== 0) {
-                result.textContent = '请先登录 B 站再使用此功能';
+                result.textContent = '⚠️ 请先登录 B 站再使用此功能（刷新后再试）';
                 return;
             }
             const myUid = selfData.data.mid;
 
             let found = null;
 
+            // 遍历关注列表
             for (let pn = 1; pn <= 80 && !found; pn++) {
                 result.textContent = `正在检查第 ${pn} 页...`;
 
                 const followRes = await fetch(
-                    `https://api.bilibili.com/x/relation/followings?vmid=${myUid}&pn=${pn}&ps=50`
+                    `https://api.bilibili.com/x/relation/followings?vmid=${myUid}&pn=${pn}&ps=50`,
+                    { credentials: 'include' } // 带上 Cookie
                 );
                 const followData = await followRes.json();
 
@@ -131,6 +140,7 @@
                 if (followData.data.list.length < 50) break;
             }
 
+            // 输出结果
             if (!found) {
                 result.textContent = '❌ 未找到该 up 主，可能未关注或昵称不同。';
             } else {
